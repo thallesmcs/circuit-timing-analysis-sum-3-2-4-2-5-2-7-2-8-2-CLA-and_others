@@ -1,0 +1,495 @@
+library ieee;
+use ieee.std_logic_1164.all;
+
+Entity Mux21ab is 
+port( 
+a, b, sel 	: in std_logic;
+y 				: out std_logic	
+);
+end Mux21ab;
+Architecture circuito of Mux21ab is
+
+begin 
+
+ with sel select 
+	y <= a when '0',
+		  b when others;
+		  
+end circuito;
+
+LIBRARY ieee;
+USE ieee.std_logic_1164.all;
+
+ENTITY half_adder_a IS
+
+PORT (a, b 	       : IN STD_LOGIC;
+	  cout, s 		: OUT STD_LOGIC
+     );
+END half_adder_a;
+
+ARCHITECTURE soma OF half_adder_a IS
+BEGIN
+
+s    <= a XOR b ;
+cout <= a AND b;
+
+END soma;
+
+LIBRARY ieee;
+USE ieee.std_logic_1164.all;
+
+ENTITY full_adder_a IS
+	PORT (CIN, A, B: IN STD_LOGIC;
+		  COUT, S: OUT STD_LOGIC
+	);
+END full_adder_a;
+
+ARCHITECTURE comportamento OF full_adder_a IS
+
+SIGNAL fio1, fio2, fio3: STD_LOGIC;
+
+BEGIN
+	fio1 <= A XOR B; 
+	S <= fio1 XOR CIN;
+	fio2 <= A AND B; 
+	fio3 <= fio1 AND CIN; 
+	COUT <= fio3 OR fio2; 
+
+END comportamento;
+
+library ieee;
+use ieee.std_logic_1164.all;
+
+entity cgen is
+   port(
+      in1, in2, in3  : in  std_logic;
+      CGEN           : out std_logic
+   );
+end cgen;
+
+architecture arq of cgen is
+begin
+
+   CGEN <= ((in2 or in3) and in1) or (in2 and in3);
+
+end arq;
+
+library ieee;
+use ieee.std_logic_1164.all;
+
+entity ladner_fischer_15 is
+    port (
+        A    : in  std_logic_vector(14 downto 0);
+        B    : in  std_logic_vector(14 downto 0);
+        Cin  : in  std_logic;
+        SUM  : out std_logic_vector(14 downto 0);
+        Cout : out std_logic
+    );
+end ladner_fischer_15;
+
+architecture rtl of ladner_fischer_15 is
+
+    -- nível 0: sinais propagate e generate
+    signal P0 : std_logic_vector(14 downto 0);
+    signal G0 : std_logic_vector(14 downto 0);
+
+    -- nível 1 (distância = 1)
+    signal P1 : std_logic_vector(14 downto 0);
+    signal G1 : std_logic_vector(14 downto 0);
+
+    -- nível 2 (distância = 2) 
+    signal P2 : std_logic_vector(14 downto 0);
+    signal G2 : std_logic_vector(14 downto 0);
+
+    -- nível 3 (distância = 4)
+    signal P3 : std_logic_vector(14 downto 0);
+    signal G3 : std_logic_vector(14 downto 0);
+
+    -- nível 4 (distância = 8)
+    signal P4 : std_logic_vector(14 downto 0);
+    signal G4 : std_logic_vector(14 downto 0);
+
+    -- prefixes finais 
+    signal PrefG : std_logic_vector(14 downto 0);
+    signal PrefP : std_logic_vector(14 downto 0);
+
+    -- carries
+    signal C : std_logic_vector(15 downto 0);
+
+begin
+
+    ----------------------------------------------------------------
+    -- nível 0: propagate / generate
+    ----------------------------------------------------------------
+    P0 <= A xor B;
+    G0 <= A and B;
+
+    C(0) <= Cin;
+
+    ----------------------------------------------------------------
+    -- nível 1 
+    ----------------------------------------------------------------
+    P1(0)  <= P0(0);            G1(0)  <= G0(0);
+    P1(1)  <= P0(1) and P0(0);  G1(1)  <= G0(1) or (P0(1) and G0(0));
+
+    P1(2)  <= P0(2);            G1(2)  <= G0(2);
+    P1(3)  <= P0(3) and P0(2);  G1(3)  <= G0(3) or (P0(3) and G0(2));
+
+    P1(4)  <= P0(4);            G1(4)  <= G0(4);
+    P1(5)  <= P0(5) and P0(4);  G1(5)  <= G0(5) or (P0(5) and G0(4));
+
+    P1(6)  <= P0(6);            G1(6)  <= G0(6);
+    P1(7)  <= P0(7) and P0(6);  G1(7)  <= G0(7) or (P0(7) and G0(6));
+
+    P1(8)  <= P0(8);            G1(8)  <= G0(8);
+    P1(9)  <= P0(9) and P0(8);  G1(9)  <= G0(9) or (P0(9) and G0(8));
+
+    P1(10) <= P0(10);           G1(10) <= G0(10);
+    P1(11) <= P0(11) and P0(10);G1(11) <= G0(11) or (P0(11) and G0(10));
+
+    P1(12) <= P0(12);           G1(12) <= G0(12);
+    P1(13) <= P0(13) and P0(12);G1(13) <= G0(13) or (P0(13) and G0(12));
+
+    P1(14) <= P0(14);           G1(14) <= G0(14);
+
+    ----------------------------------------------------------------
+    -- nível 2 (distância = 2)
+    ----------------------------------------------------------------
+    
+    P2(0)  <= P1(0);  G2(0)  <= G1(0);
+    P2(1)  <= P1(1);  G2(1)  <= G1(1);
+
+    P2(2)  <= P1(2) and P1(1);  G2(2)  <= G1(2) or (P1(2) and G1(1));
+    
+    P2(3)  <= P1(3) and P1(2);  G2(3)  <= G1(3) or (P1(3) and G1(2));
+
+    P2(4)  <= P1(4);  G2(4)  <= G1(4);
+    P2(5)  <= P1(5);  G2(5)  <= G1(5);
+
+    P2(6)  <= P1(6) and P1(5);  G2(6)  <= G1(6) or (P1(6) and G1(5));
+    P2(7)  <= P1(7) and P1(6);  G2(7)  <= G1(7) or (P1(7) and G1(6));
+
+    P2(8)  <= P1(8);  G2(8)  <= G1(8);
+    P2(9)  <= P1(9);  G2(9)  <= G1(9);
+
+    P2(10) <= P1(10) and P1(9);  G2(10) <= G1(10) or (P1(10) and G1(9));
+    P2(11) <= P1(11) and P1(10); G2(11) <= G1(11) or (P1(11) and G1(10));
+
+    P2(12) <= P1(12);  G2(12) <= G1(12);
+    P2(13) <= P1(13);  G2(13) <= G1(13);
+
+    P2(14) <= P1(14);  G2(14) <= G1(14);
+
+    ----------------------------------------------------------------
+    -- nível 3 (distância = 4)
+    ----------------------------------------------------------------
+    
+    P3(0) <= P2(0);  G3(0) <= G2(0);
+    P3(1) <= P2(1);  G3(1) <= G2(1);
+    P3(2) <= P2(2);  G3(2) <= G2(2);
+    P3(3) <= P2(3);  G3(3) <= G2(3);
+
+    P3(4) <= P2(4) and P2(3);  G3(4) <= G2(4) or (P2(4) and G2(3));
+    -- i = 5: combine (5 with 4)
+    P3(5) <= P2(5) and P2(4);  G3(5) <= G2(5) or (P2(5) and G2(4));
+
+    P3(6) <= P2(6) and P2(5);  G3(6) <= G2(6) or (P2(6) and G2(5));
+    P3(7) <= P2(7) and P2(6);  G3(7) <= G2(7) or (P2(7) and G2(6));
+
+    P3(8)  <= P2(8);  G3(8)  <= G2(8);
+    P3(9)  <= P2(9);  G3(9)  <= G2(9);
+    P3(10) <= P2(10); G3(10) <= G2(10);
+    P3(11) <= P2(11); G3(11) <= G2(11);
+
+    P3(12) <= P2(12) and P2(11); G3(12) <= G2(12) or (P2(12) and G2(11));
+    P3(13) <= P2(13) and P2(12); G3(13) <= G2(13) or (P2(13) and G2(12));
+    P3(14) <= P2(14) and P2(13); G3(14) <= G2(14) or (P2(14) and G2(13));
+
+    ----------------------------------------------------------------
+    -- nível 4 (distância = 8)
+    ----------------------------------------------------------------
+    
+    P4(0) <= P3(0);  G4(0) <= G3(0);
+    P4(1) <= P3(1);  G4(1) <= G3(1);
+    P4(2) <= P3(2);  G4(2) <= G3(2);
+    P4(3) <= P3(3);  G4(3) <= G3(3);
+    P4(4) <= P3(4);  G4(4) <= G3(4);
+    P4(5) <= P3(5);  G4(5) <= G3(5);
+    P4(6) <= P3(6);  G4(6) <= G3(6);
+    P4(7) <= P3(7);  G4(7) <= G3(7);
+
+    -- 8..14: combine with lower half to obtain full prefixes
+    P4(8)  <= P3(8)  and P3(7);  G4(8)  <= G3(8)  or (P3(8)  and G3(7));
+    P4(9)  <= P3(9)  and P3(7);  G4(9)  <= G3(9)  or (P3(9)  and G3(7));
+    P4(10) <= P3(10) and P3(7);  G4(10) <= G3(10) or (P3(10) and G3(7));
+    P4(11) <= P3(11) and P3(7);  G4(11) <= G3(11) or (P3(11) and G3(7));
+    P4(12) <= P3(12) and P3(7);  G4(12) <= G3(12) or (P3(12) and G3(7));
+    P4(13) <= P3(13) and P3(7);  G4(13) <= G3(13) or (P3(13) and G3(7));
+    P4(14) <= P3(14) and P3(7);  G4(14) <= G3(14) or (P3(14) and G3(7));
+
+    ----------------------------------------------------------------
+    -- Computar prefixos finais PrefG/PrefP 
+    ----------------------------------------------------------------
+    PrefG(0)  <= G0(0);           PrefP(0)  <= P0(0);
+
+    PrefG(1)  <= G1(1);           PrefP(1)  <= P1(1);
+
+    -- prefix 2
+    PrefG(2)  <= G2(2);           PrefP(2)  <= P2(2);
+
+    -- prefix 3
+    PrefG(3)  <= G2(3);           PrefP(3)  <= P2(3);
+
+    -- prefix 4
+    PrefG(4)  <= G3(4);           PrefP(4)  <= P3(4);
+
+    PrefG(5)  <= G3(5);           PrefP(5)  <= P3(5);
+    PrefG(6)  <= G3(6);           PrefP(6)  <= P3(6);
+    PrefG(7)  <= G3(7);           PrefP(7)  <= P3(7);
+
+    -- prefixes 8 a 14
+    PrefG(8)  <= G4(8);           PrefP(8)  <= P4(8);
+    PrefG(9)  <= G4(9);           PrefP(9)  <= P4(9);
+    PrefG(10) <= G4(10);          PrefP(10) <= P4(10);
+    PrefG(11) <= G4(11);          PrefP(11) <= P4(11);
+    PrefG(12) <= G4(12);          PrefP(12) <= P4(12);
+    PrefG(13) <= G4(13);          PrefP(13) <= P4(13);
+    PrefG(14) <= G4(14);          PrefP(14) <= P4(14);
+
+    ----------------------------------------------------------------
+    -- Carries
+    ----------------------------------------------------------------
+    C(0) <= Cin;
+    C(1) <= PrefG(0)  or (PrefP(0)  and Cin);
+    C(2) <= PrefG(1)  or (PrefP(1)  and Cin);
+    C(3) <= PrefG(2)  or (PrefP(2)  and Cin);
+    C(4) <= PrefG(3)  or (PrefP(3)  and Cin);
+    C(5) <= PrefG(4)  or (PrefP(4)  and Cin);
+    C(6) <= PrefG(5)  or (PrefP(5)  and Cin);
+    C(7) <= PrefG(6)  or (PrefP(6)  and Cin);
+    C(8) <= PrefG(7)  or (PrefP(7)  and Cin);
+    C(9) <= PrefG(8)  or (PrefP(8)  and Cin);
+    C(10) <= PrefG(9) or (PrefP(9) and Cin);
+    C(11) <= PrefG(10) or (PrefP(10) and Cin);
+    C(12) <= PrefG(11) or (PrefP(11) and Cin);
+    C(13) <= PrefG(12) or (PrefP(12) and Cin);
+    C(14) <= PrefG(13) or (PrefP(13) and Cin);
+    C(15) <= PrefG(14) or (PrefP(14) and Cin);
+
+    ----------------------------------------------------------------
+    -- Somatório final
+    ----------------------------------------------------------------
+    SUM(0)  <= P0(0)  xor C(0);
+    SUM(1)  <= P0(1)  xor C(1);
+    SUM(2)  <= P0(2)  xor C(2);
+    SUM(3)  <= P0(3)  xor C(3);
+    SUM(4)  <= P0(4)  xor C(4);
+    SUM(5)  <= P0(5)  xor C(5);
+    SUM(6)  <= P0(6)  xor C(6);
+    SUM(7)  <= P0(7)  xor C(7);
+    SUM(8)  <= P0(8)  xor C(8);
+    SUM(9)  <= P0(9)  xor C(9);
+    SUM(10) <= P0(10) xor C(10);
+    SUM(11) <= P0(11) xor C(11);
+    SUM(12) <= P0(12) xor C(12);
+    SUM(13) <= P0(13) xor C(13);
+    SUM(14) <= P0(14) xor C(14);
+
+    Cout <= C(15);
+
+end rtl;
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+PACKAGE my_componentsa1 IS
+
+COMPONENT Mux21ab is 
+port( 
+a, b, sel 	: in std_logic;
+y 				: out std_logic	
+);
+END COMPONENT;
+
+COMPONENT half_adder_a IS
+
+PORT (a, b 	       : IN STD_LOGIC;
+	  cout, s 		: OUT STD_LOGIC
+     );
+END COMPONENT;
+
+COMPONENT full_adder_a IS
+	PORT (CIN, A, B: IN STD_LOGIC;
+		  COUT, S: OUT STD_LOGIC
+	);
+END COMPONENT;
+
+COMPONENT cgen is
+   port(
+      in1, in2, in3  : in  std_logic;
+      CGEN           : out std_logic
+   );
+end COMPONENT;
+
+COMPONENT ladner_fischer_15 is
+    port (
+        A    : in  std_logic_vector(14 downto 0);
+        B    : in  std_logic_vector(14 downto 0);
+        Cin  : in  std_logic;
+        SUM  : out std_logic_vector(14 downto 0);
+        Cout : out std_logic
+    );
+end COMPONENT;
+
+END my_componentsa1;
+
+LIBRARY ieee;
+USE ieee.std_logic_1164.all;
+USE work.my_componentsa1.all;
+
+ENTITY compressor_4entradas1 IS
+PORT (A, B, C, D, Cin: IN STD_LOGIC;
+	  Cout, Carry, Sum : OUT STD_LOGIC);
+
+END compressor_4entradas1;
+
+ARCHITECTURE comportamento OF compressor_4entradas1 IS
+
+SIGNAL  out_xor1, out_xor2, out_xor3, out_xor4 :  STD_LOGIC;
+SIGNAL	out_mux1, out_mux2 : STD_LOGIC;
+
+BEGIN
+
+	out_xor1 <= A XOR B;
+
+	out_xor2 <= C XOR D;
+
+	out_xor3 <= out_xor1 XOR out_xor2;
+
+	out_xor4 <= Cin XOR out_xor3;
+				
+    s0: Mux21ab PORT MAP (A, C, out_xor1, out_mux1);
+			
+    s1: Mux21ab PORT MAP (D, Cin, out_xor3, out_mux2);
+	
+    Sum <= out_xor4;
+	Carry <= out_mux2;
+	Cout <= out_mux1;
+	 	
+END comportamento;
+
+LIBRARY ieee;
+USE ieee.std_logic_1164.all;
+USE work.my_componentsa1.all;
+
+Entity compressor_7entradas1a is 
+	port( 
+		a, b, c, d, e, f, g, cin1, cin2: in std_logic;
+		cout1, cout2, sum, carry: out std_logic	
+		);
+end compressor_7entradas1a;
+
+Architecture circuito of compressor_7entradas1a is
+
+ ---- SINAIS ----
+   signal c1, c2, c3 : std_logic;
+   signal s1, s2, s3, s4, s5 : std_logic;
+begin
+
+
+   cgen1: cgen port map(in1 => b, in2 => c, in3 => d, CGEN => c1);
+   cgen2: cgen port map(in1 => e, in2 => f, in3 => g, CGEN => c2);
+   cgen3: cgen port map(in1 => a, in2 => s1, in3 => s2, CGEN => c3);
+
+   s1 <= (b xor c) xor d;
+   s2 <= (e xor f) xor g;
+   s3 <= c1 xor c2;
+   s4 <= a xor (s1 xor s2);
+   s5 <= s4 xor cin2;
+
+   sum <= s5 xor cin1;
+	
+   carry <= s4   when s5 = '0' else
+            cin1 when s5 = '1';
+
+   cout1 <= s3 xor c3;
+
+   cout2 <= c1 when s3 = '0' else
+            c3 when s3 = '1';
+
+END circuito;
+
+library ieee;
+use ieee.std_logic_1164.all;
+
+PACKAGE my_componentsb1 IS
+
+COMPONENT RCA15b IS
+PORT (
+	  A, B: IN STD_LOGIC_VECTOR(14 downto 0);
+	  Cout : OUT STD_LOGIC;
+	  Sum : OUT STD_LOGIC_VECTOR(14 downto 0)
+	  );
+
+END COMPONENT;
+
+COMPONENT compressor_4entradas1 IS
+PORT (A, B, C, D, Cin: IN STD_LOGIC;
+	  Cout, Carry, Sum : OUT STD_LOGIC);
+
+END COMPONENT;
+
+COMPONENT compressor_7entradas1a IS
+port (A, B, C, D, E, F, G, cin1, cin2: in std_logic;
+		cout1, cout2, sum, carry: out std_logic	
+		);
+end COMPONENT;
+
+END my_componentsb1;
+
+library ieee;
+use ieee.std_logic_1164.all;
+USE work.my_componentsa1.all;
+USE work.my_componentsb1.all;
+
+ENTITY compressor_7x2_16b_Ladner_Fischer IS
+PORT ( a, b, c, d, e, f, g : IN  STD_LOGIC_vector(15 downto 0);
+	   sum           : OUT STD_LOGIC_vector(18 downto 0)
+	  );
+END compressor_7x2_16b_Ladner_Fischer; 
+
+ARCHITECTURE behavior OF compressor_7x2_16b_Ladner_Fischer IS
+
+SIGNAL suma: STD_LOGIC_VECTOR(14 downto 0);
+SIGNAL carrya: STD_LOGIC_VECTOR(15 DOWNTO 0); 
+SIGNAL Coutab, temp1, temp0: STD_LOGIC;
+SIGNAL couta0, couta1, couta2, couta3, couta4, couta5, couta6, couta7, couta8, couta9, 
+couta10, couta11, couta12, couta13, couta14, couta15, couta16, couta17, couta18, couta19, 
+couta20, couta21, couta22, couta23, couta24, couta25, couta26, couta27, couta28,
+couta29, couta30, couta31: STD_LOGIC;
+
+BEGIN
+
+stage_0: compressor_7entradas1a port map (a(0), b(0), c(0), d(0), e(0), f(0), g(0), '0', '0', couta0, couta1, sum(0), carrya(0));
+stage_1: compressor_7entradas1a port map (a(1), b(1), c(1), d(1), e(1), f(1), g(1), couta0, '0', couta2, couta3, suma(0), carrya(1));
+stage_2: compressor_7entradas1a port map (a(2), b(2), c(2), d(2), e(2), f(2), g(2), couta1, couta2, couta4, couta5, suma(1), carrya(2));
+stage_3: compressor_7entradas1a port map (a(3), b(3), c(3), d(3), e(3), f(3), g(3), couta3, couta4, couta6, couta7, suma(2), carrya(3));
+stage_4: compressor_7entradas1a port map (a(4), b(4), c(4), d(4), e(4), f(4), g(4), couta5, couta6, couta8, couta9, suma(3), carrya(4));
+stage_5: compressor_7entradas1a port map (a(5), b(5), c(5), d(5), e(5), f(5), g(5), couta7, couta8, couta10, couta11, suma(4), carrya(5));
+stage_6: compressor_7entradas1a port map (a(6), b(6), c(6), d(6), e(6), f(6), g(6), couta9, couta10, couta12, couta13, suma(5), carrya(6));
+stage_7: compressor_7entradas1a port map (a(7), b(7), c(7), d(7), e(7), f(7), g(7), couta11, couta12, couta14, couta15, suma(6), carrya(7));
+stage_8: compressor_7entradas1a port map (a(8), b(8), c(8), d(8), e(8), f(8), g(8), couta13, couta14, couta16, couta17, suma(7), carrya(8));
+stage_9: compressor_7entradas1a port map (a(9), b(9), c(9), d(9), e(9), f(9), g(9), couta15, couta16, couta18, couta19, suma(8), carrya(9));
+stage_10: compressor_7entradas1a port map (a(10), b(10), c(10), d(10), e(10), f(10), g(10), couta17, couta18, couta20, couta21, suma(9), carrya(10));
+stage_11: compressor_7entradas1a port map (a(11), b(11), c(11), d(11), e(11), f(11), g(11), couta19, couta20, couta22, couta23, suma(10), carrya(11));
+stage_12: compressor_7entradas1a port map (a(12), b(12), c(12), d(12), e(12), f(12), g(12), couta21, couta22, couta24, couta25, suma(11), carrya(12));
+stage_13: compressor_7entradas1a port map (a(13), b(13), c(13), d(13), e(13), f(13), g(13), couta23, couta24, couta26, couta27, suma(12), carrya(13));
+stage_14: compressor_7entradas1a port map (a(14), b(14), c(14), d(14), e(14), f(14), g(14), couta25, couta26, couta28, couta29, suma(13), carrya(14));
+stage_15: compressor_7entradas1a port map (a(15), b(15), c(15), d(15), e(15), f(15), g(15), couta27, couta28, couta30, couta31, suma(14), carrya(15));
+
+stage_16: ladner_fischer_15 port map (carrya(14 downto 0), suma, '0', sum(15 downto 1), Coutab);
+
+stage_17: compressor_4entradas1 port map (couta29, carrya(15), couta30, '0', Coutab, temp1, temp0, sum(16));
+stage_18: full_adder_a port map (couta31, temp1, temp0, sum(18), sum(17));
+
+END behavior;  
